@@ -20,10 +20,10 @@ class Config(Base):
 class Parameter(Base):
     __tablename__ = 'parameter'
     id = Column('parameter_id', Integer, primary_key=True, index=True)
-    name = Column(ShortString, nullable=False)
+    name = Column(ShortString, nullable=False, unique=True)
     type = Column(ShortString, nullable=False)
-    value = Column(LongString, nullable=False)
     weight = Column(Float, nullable=False)
+    value = Column(LongString)
 
 
 program_to_parameter = Table(
