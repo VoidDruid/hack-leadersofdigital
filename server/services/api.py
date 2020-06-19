@@ -28,13 +28,10 @@ class Api(APIRouter):
 
 
 def Error(
-    error: Union[str, Dict, List, Tuple],
-    code: int = 400,
-    error_code: str = 'Error',
+    error: Union[str, Dict, List, Tuple], code: int = 400, error_code: str = 'Error',
 ) -> UJSONResponse:  # noqa
     return UJSONResponse(
-        status_code=code,
-        content=ErrorResponse(ok=False, error=error, error_code=error_code).dict()
+        status_code=code, content=ErrorResponse(ok=False, error=error, error_code=error_code).dict()
     )
 
 

@@ -12,7 +12,9 @@ app = make_app()
 
 @app.exception_handler(RequestValidationError)
 def type_error_handler(request: Request, exc: RequestValidationError) -> UJSONResponse:
-    return UJSONResponse(status_code=422, content={'ok': False, 'error': exc.args, 'error_code': 'INVALID_REQUEST'})
+    return UJSONResponse(
+        status_code=422, content={'ok': False, 'error': exc.args, 'error_code': 'INVALID_REQUEST'}
+    )
 
 
 @app.middleware('http')
@@ -28,11 +30,12 @@ app.include_router(api, tags=['api'], prefix='/api')
 
 if DEBUG:
     from starlette.middleware.cors import CORSMiddleware
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=['*'],
         allow_credentials=True,
         allow_methods=['*'],
         allow_headers=['*'],
-        expose_headers=['*']
+        expose_headers=['*'],
     )
