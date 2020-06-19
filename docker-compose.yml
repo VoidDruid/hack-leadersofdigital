@@ -5,7 +5,7 @@ networks:
 
 services:
   core: &service
-    container_name: unihack-core
+    container_name: ldigital-core
     environment:
       - RUN_LEVEL=dev
     entrypoint:
@@ -25,7 +25,7 @@ services:
     depends_on:
       - postgres
   postgres:
-    container_name: unihack-postgres
+    container_name: ldigital-postgres
     image: mdillon/postgis
     ports:
       - "5432:5432"
@@ -40,7 +40,7 @@ services:
   nginx:
     build:
       context: nginx
-    container_name: unihack-nginx
+    container_name: ldigital-nginx
     ports:
       - "80:80"
     volumes:
