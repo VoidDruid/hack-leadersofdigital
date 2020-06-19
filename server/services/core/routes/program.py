@@ -26,6 +26,7 @@ def programs_list(
     if limit > service_settings.MAX_LIMIT:
         return Error(f'Maximum limit is {service_settings.MAX_LIMIT}!')
     programs = get_programs_(db, category).order_by(Program.id).offset(offset).limit(limit).all()
-    my_programs = List[ProgramLightSchema]
+    my_programs = list()
     for p in programs:
         my_programs.append({'name': p['name'], 'id': p['id']})
+    return my_programs
