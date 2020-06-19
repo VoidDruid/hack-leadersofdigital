@@ -39,6 +39,7 @@ class DatabaseSettings(AppSettings):
 
 class ServiceSettings(AppSettings):
     MAX_LIMIT: int = 20  # for paging, remove if unused
+    CONFIG_CACHE_TTL: int = 60
 
 
 service_settings = ServiceSettings()

@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Query, Session
 
-from database import Parameter
+from database.models import Parameter
 
 
-def get_parameters(db: Session,) -> Query:
+def get_parameters(db: Session) -> Query:
     return db.query(Parameter)
 
 

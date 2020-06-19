@@ -1,10 +1,11 @@
+from typing import Optional
+
 from sqlalchemy.orm import Query, Session
-from typing import List, Optional, Union
 
-from database import Program, ProgramCreateSchema, Parameter
+from database.models import Parameter, Program, ProgramCreateSchema
 
 
-def get_programs(db: Session, category: str) -> Query:
+def get_programs(db: Session, category: Optional[str]) -> Query:
     if category:
         return db.query(Program).filter(Program.category == category)
     else:
@@ -14,6 +15,7 @@ def get_programs(db: Session, category: str) -> Query:
 def get_program(db: Session, program_id: int) -> Program:
     return db.query(Program).filter(Program.id == program_id).first()
 
+
 def create_program(db: Session, program: ProgramCreateSchema) -> Program:
     parameters = db.query(Parameter).all()
     db_program = Program(
@@ -22,7 +24,7 @@ def create_program(db: Session, program: ProgramCreateSchema) -> Program:
         hours=program.hours,
         is_minor=program.is_minor,
         category=program.category,
-        parameters=parameters
+        parameters=parameters,
     )
 
     db.add(db_program)

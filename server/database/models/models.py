@@ -1,6 +1,7 @@
 from enum import Enum
 
-from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String, Table, Text
+from sqlalchemy import Column, Float, ForeignKey, Integer, PrimaryKeyConstraint, String, Table, Text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
 from database import Base
@@ -28,14 +29,35 @@ class Parameter(Base):
     value = Column(LongString)
 
 
-program_to_parameter = Table(
-    'program_to_parameter',
-    Base.metadata,
-    Column('left_id', Integer, ForeignKey(Parameter.id), nullable=False),
-    Column('right_id', Integer, ForeignKey('program.program_id'), nullable=False),
-    Column('weight', Float),
-    Column('value', ShortString),
-)
+class Discipline(Base):
+    __tablename__ = 'discipline'
+    id = Column('discipline_id', Integer, primary_key=True, index=True)
+    name = Column(ShortString, index=True, nullable=False)
+    category = Column(ShortString, index=True)
+    parameters = Column('parameters', JSONB)
+
+
+class ConcreteParameter(Base):
+    __tablename__ = 'program_to_parameter'
+    parameter_id = Column(
+        'parameter_id', Integer, ForeignKey(Parameter.id), nullable=False, primary_key=True
+    )
+    program_id = Column(
+        'program_id', Integer, ForeignKey('program.program_id'), nullable=False, primary_key=True
+    )
+    weight = Column('weight', Float)
+    value = Column('value', ShortString)
+
+
+class ConcreteDiscipline(Base):
+    __tablename__ = 'program_to_discipline'
+    discipline_id = Column(
+        'discipline_id', Integer, ForeignKey(Discipline.id), nullable=False, primary_key=True
+    )
+    program_id = Column(
+        'program_id', Integer, ForeignKey('program.program_id'), nullable=False, primary_key=True
+    )
+    hours = Column('hours', Integer)
 
 
 class Program(Base):
@@ -44,9 +66,9 @@ class Program(Base):
     name = Column(ShortString, index=True, nullable=False)
     description = Column(Text)
     hours = Column(Integer)
-    is_minor = Column(Boolean, default=False, nullable=False)
     category = Column(ShortString, index=True)
-    parameters = relationship(Parameter, secondary=program_to_parameter)
+    parameters = relationship(Parameter, secondary=ConcreteParameter.__table__)
+    disciplines = relationship(Discipline, secondary=ConcreteDiscipline.__table__)
 
 
 class ProgramTemplate(Base):

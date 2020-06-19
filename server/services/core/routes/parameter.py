@@ -5,11 +5,12 @@ from sqlalchemy.orm import Session
 from starlette.responses import Response
 
 from conf import service_settings
-from crud import get_parameters as get_parameters_
 from crud import get_parameter as get_parameter_
+from crud import get_parameters as get_parameters_
 from database import Parameter, ParameterSchema
-from services.api import Error, extra
+from services.api import extra
 from services.dependencies import get_db
+from services.utils import paginate
 
 from . import api
 
@@ -23,6 +24,4 @@ def get_parameter(parameter_id: int, db: Session = Depends(get_db)) -> Parameter
 def parameters_list(
     db: Session = Depends(get_db), offset: int = 0, limit: int = service_settings.MAX_LIMIT,
 ) -> Union[Response, List[Parameter]]:
-    if limit > service_settings.MAX_LIMIT:
-        return Error(f'Maximum limit is {service_settings.MAX_LIMIT}!')
-    return get_parameters_(db).order_by(Parameter.id).offset(offset).limit(limit).all()
+    return paginate(get_parameters_(db), Parameter, offset, limit)

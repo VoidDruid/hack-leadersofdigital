@@ -5,12 +5,13 @@ from sqlalchemy.orm import Session
 from starlette.responses import Response
 
 from conf import service_settings
+from crud import create_program as create_program_
 from crud import get_program as get_program_
 from crud import get_programs as get_programs_
-from crud import create_program as create_program_
-from database import Program, ProgramSchema, ProgramLightSchema, ProgramCreateSchema
-from services.api import Error, extra
+from database import Program, ProgramCreateSchema, ProgramSchema
+from services.api import extra
 from services.dependencies import get_db
+from services.utils import paginate
 
 from . import api
 
@@ -22,12 +23,12 @@ def get_program(program_id: int, db: Session = Depends(get_db)) -> Program:
 
 @api.get('/program', response_model=List[ProgramSchema], responses=extra)
 def programs_list(
-    db: Session = Depends(get_db), offset: int = 0, limit: int = service_settings.MAX_LIMIT, category: str = None
+    db: Session = Depends(get_db),
+    offset: int = 0,
+    limit: int = service_settings.MAX_LIMIT,
+    category: str = None,
 ) -> Union[Response, List[Program]]:
-    if limit > service_settings.MAX_LIMIT:
-        return Error(f'Maximum limit is {service_settings.MAX_LIMIT}!')
-    programs = get_programs_(db, category).order_by(Program.id).offset(offset).limit(limit).all()
-    return programs
+    return paginate(get_programs_(db, category), Program, offset, limit)
 
 
 @api.post('/program', response_model=ProgramSchema, responses=extra)

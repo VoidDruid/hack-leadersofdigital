@@ -16,14 +16,21 @@ class ParameterSchema(ORMSchema):
     value: Optional[str] = None
 
 
+class DisciplineSchema(ORMSchema):
+    id: int
+    name: str
+    category: str
+
+
 class ProgramCreateSchema(ORMSchema):  # post
     name: str
     description: Optional[str] = None
     hours: Optional[int] = None
-    is_minor: bool = False
     category: Optional[str] = None
+    disciplines: Optional[List[int]] = None
 
 
 class ProgramSchema(ProgramCreateSchema):  # get
     id: int
     parameters: List[ParameterSchema]
+    disciplines: List[DisciplineSchema]

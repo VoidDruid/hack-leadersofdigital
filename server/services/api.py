@@ -17,8 +17,9 @@ def make_app(*args: Any, **kwargs: Any) -> FastAPI:
 
 class APIResponse(UJSONResponse):
     def render(self, content: Any) -> bytes:
-        # Customize response here
-        return super().render(content)
+        if isinstance(content, dict) and 'ok' in content:
+            return super().render(content)
+        return super().render({'ok': True, 'data': content})
 
 
 class Api(APIRouter):
