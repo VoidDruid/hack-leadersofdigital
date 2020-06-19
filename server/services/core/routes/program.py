@@ -15,8 +15,8 @@ from . import api
 
 
 @api.get('/program/{id}', response_model=ProgramModel)
-def get_program(id: int, db: Session = Depends(get_db)) -> Program:
-    return get_program_(db, id)
+def get_program(program_id: int, db: Session = Depends(get_db)) -> Program:
+    return get_program_(db, program_id)
 
 
 @api.get('/program', response_model=List[ProgramModelLight], responses=responses)
