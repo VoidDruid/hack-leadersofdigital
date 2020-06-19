@@ -1,6 +1,7 @@
+import datetime
 from enum import Enum
 
-from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String, Table, Text
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Table, Text
 from sqlalchemy.orm import relationship
 
 from database import Base
@@ -47,6 +48,10 @@ class Program(Base):
     is_minor = Column(Boolean, default=False, nullable=False)
     category = Column(ShortString, index=True)
     parameters = relationship(Parameter, secondary=program_to_parameter)
+
+    # time
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    deleted_at = Column(DateTime, nullable=True, default=None)
 
 
 class ProgramTemplate(Base):

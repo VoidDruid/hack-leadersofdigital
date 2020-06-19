@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 from starlette.responses import Response
 
 from conf import service_settings
-from crud import get_parameters as get_parameters_
 from crud import get_parameter as get_parameter_
+from crud import get_parameters as get_parameters_
 from database import Parameter, ParameterSchema
 from services.api import Error, extra
 from services.dependencies import get_db

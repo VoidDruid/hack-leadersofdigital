@@ -38,7 +38,5 @@ def get_config_value(db: Session, key: str) -> Any:
 
 
 def set_config_value(db: Session, key: str, value: Any) -> Config:
-
-
-get_program_threshold = partial(get_config_value, key=PROGRAM_THRESHOLD_KEY)
-get_program_max_hours = partial(get_config_value, key=PROGRAM_MAX_HOURS_KEY)
+    get_program_threshold = partial(get_config_value, key=PROGRAM_THRESHOLD_KEY)
+    get_program_max_hours = partial(get_config_value, key=PROGRAM_MAX_HOURS_KEY)
