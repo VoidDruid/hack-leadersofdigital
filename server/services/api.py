@@ -27,13 +27,20 @@ class Api(APIRouter):
         return super().api_route(*args, **kwargs)
 
 
-def Error(error: Union[str, Dict, List, Tuple], code: int = 400) -> UJSONResponse:  # noqa
-    return UJSONResponse(status_code=code, content=ErrorResponse(ok=False, error=error).dict())
+def Error(
+    error: Union[str, Dict, List, Tuple],
+    code: int = 400,
+    error_code: str = 'Error',
+) -> UJSONResponse:  # noqa
+    return UJSONResponse(
+        status_code=code,
+        content=ErrorResponse(ok=False, error=error, error_code=error_code).dict()
+    )
 
 
 # You can use those to directly return an error - `return NotFoundError('No such object')`
-PermissionsError = partial(Error, code=403)
-NotFoundError = partial(Error, code=404)
+PermissionsError = partial(Error, code=403, error_code='INVALID_PERMISSIONS')
+NotFoundError = partial(Error, code=404, error_code='NOT_FOUND')
 
 
 class ResponsesContainer(dict):
@@ -54,10 +61,10 @@ class ResponsesContainer(dict):
     def __init__(self) -> None:
         dict.__init__(self, self.default_responses)
 
-    def extra(self, extra: Optional[List[str]] = None) -> Dict[int, Dict]:
+    def __call__(self, extra_responses: Optional[List[str]] = None) -> Dict[int, Dict]:
         result_responses = self.default_responses.copy()
-        if extra:
-            for key in extra:
+        if extra_responses:
+            for key in extra_responses:
                 response = self.errors_dict.get(key)
                 if not response:
                     continue
@@ -66,6 +73,6 @@ class ResponsesContainer(dict):
 
 
 # basic usage: `@api.post(..., responses=responses)`. Error response 400 with ErrorResponse model is added by default
-# `@api.post(..., responses=responses.extra('not_found'))` - will add 404 code to default reponses
+# `@api.post(..., responses=extra('not_found'))` - will add 404 code to default responses
 # You can add new responses to the ResponsesContainer above
-responses = ResponsesContainer()
+extra = ResponsesContainer()

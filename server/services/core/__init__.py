@@ -12,7 +12,7 @@ app = make_app()
 
 @app.exception_handler(RequestValidationError)
 def type_error_handler(request: Request, exc: RequestValidationError) -> UJSONResponse:
-    return UJSONResponse(status_code=422, content={'ok': False, 'error': exc.args})
+    return UJSONResponse(status_code=422, content={'ok': False, 'error': exc.args, 'error_code': 'INVALID_REQUEST'})
 
 
 @app.middleware('http')
