@@ -19,7 +19,7 @@ RUN pip install "poetry==$POETRY_VERSION" \
 RUN mkdir /opt/app
 WORKDIR /opt/app
 
-COPY pyproject.toml poetry.lock /opt/app/
+COPY pyproject.toml poetry.loc[k] /opt/app/
 RUN poetry install --no-dev --no-interaction --no-ansi
 
 EXPOSE 8000
