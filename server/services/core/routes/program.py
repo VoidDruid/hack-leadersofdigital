@@ -26,8 +26,7 @@ def programs_list(
 ) -> Union[Response, List[Program]]:
     if limit > service_settings.MAX_LIMIT:
         return Error(f'Maximum limit is {service_settings.MAX_LIMIT}!')
-    programs = get_programs_(db, category).order_by(Program.id).offset(offset).limit(limit).all()
-    return programs
+    return get_programs_(db, category).order_by(Program.id).offset(offset).limit(limit).all()
 
 
 @api.post('/program', response_model=ProgramSchema, responses=extra)
