@@ -21,11 +21,11 @@ def get_program(program_id: int, db: Session = Depends(get_db)) -> Program:
 
 @api.get('/program', response_model=List[ProgramLightSchema], responses=extra)
 def programs_list(
-    db: Session = Depends(get_db), offset: int = 0, limit: int = service_settings.MAX_LIMIT,
+    db: Session = Depends(get_db), offset: int = 0, limit: int = service_settings.MAX_LIMIT, category: str = None
 ) -> Union[Response, List[Program]]:
     if limit > service_settings.MAX_LIMIT:
         return Error(f'Maximum limit is {service_settings.MAX_LIMIT}!')
-    programs = get_programs_(db).order_by(Program.id).offset(offset).limit(limit).all()
+    programs = get_programs_(db, category).order_by(Program.id).offset(offset).limit(limit).all()
     my_programs = List[ProgramLightSchema]
     for p in programs:
         my_programs.append({'name': p['name'], 'id': p['id']})
