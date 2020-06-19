@@ -8,7 +8,7 @@ from conf import service_settings
 from crud import get_program as get_program_
 from crud import get_programs as get_programs_
 from crud import create_program as create_program_
-from database import Program, ProgramSchema, ProgramLightSchema, ProgramCreateSchema
+from database import Program, ProgramSchema, ProgramCreateSchema
 from services.api import Error, extra
 from services.dependencies import get_db
 
