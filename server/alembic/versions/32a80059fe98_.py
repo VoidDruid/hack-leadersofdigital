@@ -6,6 +6,7 @@ Create Date: 2020-06-19 22:42:11.494464
 
 """
 import sqlalchemy as sa
+from sqlalchemy.engine.reflection import Inspector
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
@@ -30,20 +31,26 @@ def upgrade():
         op.f('ix_discipline_discipline_id'), 'discipline', ['discipline_id'], unique=False
     )
     op.create_index(op.f('ix_discipline_name'), 'discipline', ['name'], unique=False)
-    op.create_table(
-        'program_template',
-        sa.Column('program_template_id', sa.Integer(), nullable=False),
-        sa.Column('hours', sa.Integer(), nullable=True),
-        sa.Column('category', sa.String(length=25), nullable=True),
-        sa.PrimaryKeyConstraint('program_template_id'),
-        sa.UniqueConstraint('category'),
-    )
-    op.create_index(
-        op.f('ix_program_template_program_template_id'),
-        'program_template',
-        ['program_template_id'],
-        unique=False,
-    )
+
+    conn = op.get_bind()
+    inspector = Inspector.from_engine(conn)
+    tables = inspector.get_table_names()
+    if 'program_template' not in tables:
+        op.create_table(
+            'program_template',
+            sa.Column('program_template_id', sa.Integer(), nullable=False),
+            sa.Column('hours', sa.Integer(), nullable=True),
+            sa.Column('category', sa.String(length=25), nullable=True),
+            sa.PrimaryKeyConstraint('program_template_id'),
+            sa.UniqueConstraint('category'),
+        )
+        op.create_index(
+            op.f('ix_program_template_program_template_id'),
+            'program_template',
+            ['program_template_id'],
+            unique=False,
+        )
+
     op.create_table(
         'program_to_discipline',
         sa.Column('discipline_id', sa.Integer(), nullable=False),
