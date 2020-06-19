@@ -3,7 +3,12 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 
-class ParameterSchema(BaseModel):
+class ORMSchema(BaseModel):
+    class Config:
+        orm_mode = True
+
+
+class ParameterSchema(ORMSchema):
     id: int
     name: str
     type: str
@@ -11,7 +16,7 @@ class ParameterSchema(BaseModel):
     value: Optional[str] = None
 
 
-class ProgramCreateSchema(BaseModel):  # post
+class ProgramCreateSchema(ORMSchema):  # post
     name: str
     description: Optional[str] = None
     hours: Optional[int] = None
