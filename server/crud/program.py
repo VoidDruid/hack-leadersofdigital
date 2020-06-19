@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Query, Session
+from typing import List, Optional, Union
 
-from database import Program
+from database import Program, ProgramCreateSchema, Parameter
 
 
 def get_programs(db: Session, category: str) -> Query:
@@ -12,3 +13,20 @@ def get_programs(db: Session, category: str) -> Query:
 
 def get_program(db: Session, program_id: int) -> Program:
     return db.query(Program).filter(Program.id == program_id).first()
+
+def create_program(db: Session, program: ProgramCreateSchema) -> Program:
+    parameters = db.query(Parameter).all()
+    db_program = Program(
+        name=program.name,
+        description=program.description,
+        hours=program.hours,
+        is_minor=program.is_minor,
+        category=program.category,
+        parameters=parameters
+    )
+
+    db.add(db_program)
+    db.commit()
+    db.refresh(db_program)
+
+    return db_program

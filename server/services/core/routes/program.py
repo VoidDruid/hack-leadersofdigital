@@ -7,7 +7,8 @@ from starlette.responses import Response
 from conf import service_settings
 from crud import get_program as get_program_
 from crud import get_programs as get_programs_
-from database import Program, ProgramSchema, ProgramLightSchema
+from crud import create_program as create_program_
+from database import Program, ProgramSchema, ProgramLightSchema, ProgramCreateSchema
 from services.api import Error, extra
 from services.dependencies import get_db
 
@@ -28,5 +29,11 @@ def programs_list(
     programs = get_programs_(db, category).order_by(Program.id).offset(offset).limit(limit).all()
     my_programs = list()
     for p in programs:
-        my_programs.append({'name': p['name'], 'id': p['id']})
+        my_programs.append({'name': p.name, 'id': p.id})
     return my_programs
+
+@api.post('/program', response_model=ProgramSchema, responses=extra)
+def create_event(
+    program: ProgramCreateSchema, db: Session = Depends(get_db)
+) -> Union[Response, Program]:
+    return create_program_(db=db, program=program)
