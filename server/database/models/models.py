@@ -1,6 +1,6 @@
-from enum import Enum
+import datetime
 
-from sqlalchemy import Column, Float, ForeignKey, Integer, PrimaryKeyConstraint, String, Table, Text
+from sqlalchemy import Column, Float, DateTime, ForeignKey, Integer, PrimaryKeyConstraint, String, Table, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
@@ -69,6 +69,10 @@ class Program(Base):
     category = Column(ShortString, index=True)
     parameters = relationship(Parameter, secondary=ConcreteParameter.__table__)
     disciplines = relationship(Discipline, secondary=ConcreteDiscipline.__table__)
+
+    # time
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    deleted_at = Column(DateTime, nullable=True, default=None)
 
 
 class ProgramTemplate(Base):

@@ -1,3 +1,4 @@
+import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel
@@ -28,6 +29,8 @@ class ProgramCreateSchema(ORMSchema):  # post
     hours: Optional[int] = None
     category: Optional[str] = None
     disciplines: Optional[List[int]] = None
+    created_at: Optional[datetime.datetime] = None
+    deleted_at: Optional[datetime.datetime] = None
 
 
 class ProgramSchema(ProgramCreateSchema):  # get

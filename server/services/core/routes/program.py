@@ -1,4 +1,5 @@
-from typing import List, Union
+import datetime
+from typing import List, Union, Optional
 
 from fastapi import Depends
 from sqlalchemy.orm import Session
@@ -8,7 +9,7 @@ from conf import service_settings
 from crud import create_program as create_program_
 from crud import get_program as get_program_
 from crud import get_programs as get_programs_
-from database import Program, ProgramCreateSchema, ProgramSchema
+from database.models import Program, ProgramCreateSchema, ProgramSchema
 from services.api import extra
 from services.dependencies import get_db
 from services.utils import paginate
@@ -24,11 +25,18 @@ def get_program(program_id: int, db: Session = Depends(get_db)) -> Program:
 @api.get('/program', response_model=List[ProgramSchema], responses=extra)
 def programs_list(
     db: Session = Depends(get_db),
-    offset: int = 0,
-    limit: int = service_settings.MAX_LIMIT,
-    category: str = None,
+    offset: Optional[int] = 0,
+    limit: Optional[int] = service_settings.MAX_LIMIT,
+    category: Optional[str] = None,
+    start_time: Optional[datetime.datetime] = None,
+    end_time: Optional[datetime.datetime] = None,
 ) -> Union[Response, List[Program]]:
-    return paginate(get_programs_(db, category), Program, offset, limit)
+    query = get_programs_(db, category)
+    if start_time:
+        query = query.filter(Program.created_at >= start_time)
+    if end_time:
+        query = query.filter(Program.created_at <= end_time)
+    return paginate(query, Program, offset, limit)
 
 
 @api.post('/program', response_model=ProgramSchema, responses=extra)
