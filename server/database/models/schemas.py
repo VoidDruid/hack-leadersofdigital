@@ -27,8 +27,3 @@ class ProgramCreateSchema(ORMSchema):  # post
 class ProgramSchema(ProgramCreateSchema):  # get
     id: int
     parameters: List[ParameterSchema]
-
-
-class ProgramLightSchema(BaseModel):  # get
-    id: int
-    name: str

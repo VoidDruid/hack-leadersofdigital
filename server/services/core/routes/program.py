@@ -20,17 +20,15 @@ def get_program(program_id: int, db: Session = Depends(get_db)) -> Program:
     return get_program_(db, program_id)
 
 
-@api.get('/program', response_model=List[ProgramLightSchema], responses=extra)
+@api.get('/program', response_model=List[ProgramSchema], responses=extra)
 def programs_list(
     db: Session = Depends(get_db), offset: int = 0, limit: int = service_settings.MAX_LIMIT, category: str = None
 ) -> Union[Response, List[Program]]:
     if limit > service_settings.MAX_LIMIT:
         return Error(f'Maximum limit is {service_settings.MAX_LIMIT}!')
     programs = get_programs_(db, category).order_by(Program.id).offset(offset).limit(limit).all()
-    my_programs = list()
-    for p in programs:
-        my_programs.append({'name': p.name, 'id': p.id})
-    return my_programs
+    return programs
+
 
 @api.post('/program', response_model=ProgramSchema, responses=extra)
 def create_event(

@@ -1,3 +1,5 @@
+from enum import Enum
+
 from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String, Table, Text
 from sqlalchemy.orm import relationship
 
@@ -45,3 +47,10 @@ class Program(Base):
     is_minor = Column(Boolean, default=False, nullable=False)
     category = Column(ShortString, index=True)
     parameters = relationship(Parameter, secondary=program_to_parameter)
+
+
+class ProgramTemplate(Base):
+    __tablename__ = 'program_template'
+    id = Column('program_template_id', Integer, primary_key=True, index=True)
+    hours = Column(Integer)
+    category = Column(ShortString, unique=True)

@@ -18,5 +18,4 @@ from .models import *  # isort:skip
 __all__ = [
     'Base',
     'Session',
-    # Place model classes here
 ]
