@@ -7,14 +7,14 @@ from starlette.responses import Response
 from conf import service_settings
 from crud import get_program as get_program_
 from crud import get_programs as get_programs_
-from database import Parameter, ParameterModel
+from database import Parameter, ParameterSchema
 from services.api import Error, responses
 from services.dependencies import get_db
 
 from . import api
 
 
-@api.get('/parameter/{id}', response_model=ParameterModel)
+@api.get('/parameter/{id}', response_model=ParameterSchema)
 def get_parameter(parameter_id: int, db: Session = Depends(get_db)) -> Parameter:
     return get_program_(db, parameter_id)
 
