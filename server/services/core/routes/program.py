@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import Response
 
 from conf import service_settings
+from crud import get_all_programs as get_all_programs_
 from crud import get_program as get_program_
 from crud import get_programs as get_programs_
 from database import Program, ProgramModel
@@ -26,3 +27,8 @@ def programs_list(
     if limit > service_settings.MAX_LIMIT:
         return Error(f'Maximum limit is {service_settings.MAX_LIMIT}!')
     return get_programs_(db).order_by(Program.id).offset(offset).limit(limit).all()
+
+
+@api.get('/program/all', response_model=List[ProgramModel], responses=responses)
+def programs_list_all(db: Session = Depends(get_db)) -> Union[Response, List[Program]]:
+    return get_all_programs_(db).order_by(Program.id).all()
