@@ -2,6 +2,8 @@ from celery import Celery
 
 from conf import redis_settings
 
+from .tasks import *  # isort: ignore
+
 redis_base_conn = f'redis://{redis_settings.REDIS_HOST}:{redis_settings.REDIS_PORT}'
 
 app = Celery(
@@ -10,5 +12,3 @@ app = Celery(
     result_backend=f'{redis_base_conn}/{redis_settings.CELERY_RESULT_DB}',
 )
 app.conf.broker_transport_options = {'visibility_timeout': 60 * 15}  # 15 minutes
-
-from .tasks import *  # isort: ignore

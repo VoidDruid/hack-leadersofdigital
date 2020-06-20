@@ -1,10 +1,9 @@
-from typing import Optional, List
+from typing import List, Optional
 
 from worker.app import app
 
-from database import Session, Mongo
+from database import Mongo, Session
 from database.models import Program
-
 
 STATE_COLL = 'state'
 STATS_COLL = 'stats'
@@ -24,12 +23,7 @@ def scan_programs() -> List[int]:
     if processing:
         to_process = set(not_rated_programs) - set(processing['planned'])
         state_db.update_one(
-            {'_id': processing['_id']}, {
-                '$set': {
-                    'key': PROCESS_KEY,
-                    'planned': to_process
-                }
-            }
+            {'_id': processing['_id']}, {'$set': {'key': PROCESS_KEY, 'planned': to_process}}
         )
     else:
         to_process = not_rated_programs
