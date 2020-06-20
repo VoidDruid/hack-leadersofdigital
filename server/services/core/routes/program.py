@@ -16,8 +16,13 @@ from database.models import Program, ProgramCreateSchema, ProgramSchema
 from services.api import extra
 from services.dependencies import get_pg
 from services.utils import paginate, raise_on_none
+from worker.tasks import process_program
 
 from . import api
+
+
+def queue_program(id: int):
+    process_program.delay(id)
 
 
 class ProgramStats(BaseModel):
@@ -45,9 +50,12 @@ def programs_stats_list(db: Session = Depends(get_pg)) -> Union[Response, Dict]:
 
 
 @api.get('/program/spider', response_model=List[ProgramSpider], responses=extra)
-def programs_spider_list(db: Session = Depends(get_pg)) -> Union[Response, List]:
-    programs: List[Program] = get_programs_(db, None).order_by(Program.created_at).all()
-    spider_list: List[ProgramSpider] = list()
+def programs_spider_list(
+    db: Session = Depends(get_pg),
+    category: Optional[str] = None
+) -> Union[Response, List]:
+    programs: List[Program] = get_programs_(db, category).order_by(Program.created_at).all()
+    spider_list = []
     for p in programs:
         entity = {
             'id': p.id,
