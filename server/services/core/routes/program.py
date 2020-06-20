@@ -21,13 +21,8 @@ from worker.tasks import process_program
 from . import api
 
 
-def queue_program(id: int):
-    process_program.delay(id)
-
-
-class ProgramStats(BaseModel):
-    diff: Optional[Dict[str, List[Dict[str, str]]]]
-    rating: Optional[int] = 0
+def queue_program(program: Program) -> None:
+    process_program.delay(program.id)
 
 
 class ProgramSpider(BaseModel):
@@ -36,9 +31,25 @@ class ProgramSpider(BaseModel):
     rating: Optional[int] = 128
     is_deleted: bool
     disciplines: List[Dict[str, str]]
+    category: str
 
 
-@api.get('/program/stats', response_model=Dict[int, ProgramStats], responses=extra)
+class MiniDiscipline(BaseModel):
+    id: int
+    name: str
+
+
+class YearDiff(BaseModel):
+    added: List[MiniDiscipline]
+    removed: List[MiniDiscipline]
+
+
+class YearStats(BaseModel):
+    diff: YearDiff
+    rating: int = 0
+
+
+@api.get('/program/stats', response_model=Dict[int, YearStats], responses=extra)
 def programs_stats_list(db: Session = Depends(get_pg)) -> Union[Response, Dict]:
     programs: List[Program] = get_programs_(db, None).order_by(Program.created_at).all()
     stats_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
@@ -62,6 +73,7 @@ def programs_spider_list(
             'is_deleted': True if p.deleted_at is not None else False,
             'name': p.name,
             'disciplines': [],
+            'category': p.category,
         }
         for disc in p.disciplines:
             entity['disciplines'].append({'name': disc.name, 'category': disc.category})
@@ -73,13 +85,6 @@ def programs_spider_list(
 @raise_on_none
 def get_program(program_id: int, db: Session = Depends(get_pg)) -> Program:
     return get_program_(db, program_id)
-
-
-@api.patch('/program/{id}', response_model=ProgramSchema, responses=extra('not_found'))
-def update_program(
-    program_id: int, program_base: ProgramCreateSchema, db: Session = Depends(get_pg)
-) -> Union[Response, Program]:
-    return update_program_(db, program_id, program_base)
 
 
 @api.get('/program', response_model=List[ProgramSchema], responses=extra)
@@ -101,4 +106,15 @@ def programs_list(
 
 @api.post('/program', response_model=ProgramSchema, responses=extra)
 def create_event(program: ProgramCreateSchema, db: Session = Depends(get_pg)) -> Program:
-    return create_program_(db=db, program=program)
+    program = create_program_(db=db, program=program)
+    queue_program(program)
+    return program
+
+
+@api.patch('/program/{id}', response_model=ProgramSchema, responses=extra('not_found'))
+def update_program(
+    program_id: int, program_base: ProgramCreateSchema, db: Session = Depends(get_pg)
+) -> Union[Response, Program]:
+    program = update_program_(db, program_id, program_base)
+    queue_program(program)
+    return program
