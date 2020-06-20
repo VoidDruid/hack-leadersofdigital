@@ -5,10 +5,15 @@ from sqlalchemy.orm import Session
 from starlette.responses import Response
 
 from conf import service_settings
+from crud import create_discipline as create_discipline_
 from crud import get_discipline as get_discipline_
 from crud import get_disciplines as get_disciplines
-from crud import create_discipline as create_discipline_
-from database.models import Discipline, DisciplineCreateSchema, DisciplineSchema, DisciplineFullSchema
+from database.models import (
+    Discipline,
+    DisciplineCreateSchema,
+    DisciplineFullSchema,
+    DisciplineSchema,
+)
 from services.api import extra
 from services.dependencies import get_pg
 from services.utils import paginate, raise_on_none
@@ -34,7 +39,6 @@ def get_disciplines_list(
 
 @api.post('/discipline', response_model=DisciplineFullSchema)
 def create_discipline(
-    discipline: DisciplineCreateSchema,
-    db: Session = Depends(get_pg),
+    discipline: DisciplineCreateSchema, db: Session = Depends(get_pg),
 ) -> Discipline:
     return create_discipline_(db, discipline)

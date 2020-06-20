@@ -1,16 +1,8 @@
 import datetime
 
-from sqlalchemy import (
-    Column,
-    DateTime,
-    Float,
-    ForeignKey,
-    Integer,
-    String,
-    Text,
-)
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import relationship, object_session
+from sqlalchemy.orm import object_session, relationship
 
 from database import Base
 
@@ -80,21 +72,17 @@ class Program(Base):
 
     @property
     def parameters(self):
-        joined_params = object_session(self).query(
-            Parameter, ConcreteParameter
-        ).filter(
-            ConcreteParameter.program_id == self.id
-        ).filter(
-            Parameter.id == ConcreteParameter.parameter_id
-        ).all()
+        joined_params = (
+            object_session(self)
+            .query(Parameter, ConcreteParameter)
+            .filter(ConcreteParameter.program_id == self.id)
+            .filter(Parameter.id == ConcreteParameter.parameter_id)
+            .all()
+        )
 
         params = []
         for (param, concrete_param) in joined_params:
-            param_dict = {
-                'id': param.id,
-                'type': param.type,
-                'name': param.name
-            }
+            param_dict = {'id': param.id, 'type': param.type, 'name': param.name}
 
             if concrete_param.weight is not None:
                 param_dict['weight'] = concrete_param.weight

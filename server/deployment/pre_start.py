@@ -19,7 +19,6 @@ wait_seconds = 1
 )
 def init() -> None:
     try:
-        # Check if DB is reachable
         pg = Session()
         pg.execute("SELECT 1")
         mongo = Mongo()
@@ -29,5 +28,5 @@ def init() -> None:
         raise e
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     init()

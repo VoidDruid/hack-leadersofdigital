@@ -1,6 +1,6 @@
 from typing import Generator
 
-from database import Session, Mongo
+from database import Mongo, Session
 
 
 def get_pg() -> Generator[Session, None, None]:

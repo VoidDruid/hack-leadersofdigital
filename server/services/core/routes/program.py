@@ -19,15 +19,45 @@ from services.utils import paginate, raise_on_none
 from . import api
 
 
-@api.get('/program/stats', response_model=Dict[int, List[int]], responses=extra)
+class ProgramStats(BaseModel):
+    diff: Optional[Dict[str, List[Dict[str, str]]]]
+    rating: Optional[int] = 0
+
+
+class ProgramSpider(BaseModel):
+    id: int
+    name: str
+    rating: Optional[int] = 128
+    is_deleted: bool
+    disciplines: List[Dict[str, str]]
+
+
+@api.get('/program/stats', response_model=Dict[int, ProgramStats], responses=extra)
 def programs_stats_list(db: Session = Depends(get_pg)) -> Union[Response, Dict]:
-    programs: List[Program] = get_programs_(db, None).all()
-    year_dict = defaultdict(list)
+    programs: List[Program] = get_programs_(db, None).order_by(Program.created_at).all()
+    stats_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     for p in programs:
-        last_year = p.deleted_at if p.deleted_at is not None else datetime.datetime.utcnow()
-        for y in range(p.created_at.year, last_year.year + 1):
-            year_dict[y].append(p.id)
-    return year_dict
+        stats_dict[p.created_at.year]['diff']['added'].append({'id': p.id, 'name': p.name})
+        if p.deleted_at is not None:
+            stats_dict[p.created_at.year]['diff']['removed'].append({'id': p.id, 'name': p.name})
+    return stats_dict
+
+
+@api.get('/program/spider', response_model=List[ProgramSpider], responses=extra)
+def programs_spider_list(db: Session = Depends(get_pg)) -> Union[Response, List]:
+    programs: List[Program] = get_programs_(db, None).order_by(Program.created_at).all()
+    spider_list: List[ProgramSpider] = list()
+    for p in programs:
+        entity = {
+            'id': p.id,
+            'is_deleted': True if p.deleted_at is not None else False,
+            'name': p.name,
+            'disciplines': [],
+        }
+        for disc in p.disciplines:
+            entity['disciplines'].append({'name': disc.name, 'category': disc.category})
+        spider_list.append(entity)
+    return spider_list
 
 
 @api.get('/program/{id}', response_model=ProgramSchema)
@@ -54,7 +84,5 @@ def programs_list(
 
 
 @api.post('/program', response_model=ProgramSchema, responses=extra)
-def create_event(
-    program: ProgramCreateSchema, db: Session = Depends(get_pg)
-) -> Program:
+def create_event(program: ProgramCreateSchema, db: Session = Depends(get_pg)) -> Program:
     return create_program_(db=db, program=program)

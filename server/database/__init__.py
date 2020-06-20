@@ -3,12 +3,11 @@
 from typing import Any
 
 from pymongo import MongoClient
-
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from conf import PG_URI, MONGO_URI, mongo_settings
+from conf import MONGO_URI, PG_URI, mongo_settings
 
 SQLALCHEMY_DATABASE_URL = PG_URI
 engine = create_engine(SQLALCHEMY_DATABASE_URL)

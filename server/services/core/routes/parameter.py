@@ -5,10 +5,10 @@ from sqlalchemy.orm import Session
 from starlette.responses import Response
 
 from conf import service_settings
+from crud import create_parameter as create_parameter_
 from crud import get_parameter as get_parameter_
 from crud import get_parameters as get_parameters_
-from crud import create_parameter as create_parameter_
-from database.models import Parameter, ParameterSchema, ParameterCreateSchema
+from database.models import Parameter, ParameterCreateSchema, ParameterSchema
 from services.api import extra
 from services.dependencies import get_pg
 from services.utils import paginate, raise_on_none

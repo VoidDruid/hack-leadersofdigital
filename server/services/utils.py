@@ -18,7 +18,6 @@ def paginate(query: Query, model: Type[T], offset: int, limit: int) -> Union[Res
 
 
 def raise_on_none(func):
-
     @functools.wraps(func)
     def decorated(*args, **kwargs):
         result = func(*args, **kwargs)
