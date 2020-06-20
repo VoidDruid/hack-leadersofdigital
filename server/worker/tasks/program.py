@@ -21,7 +21,7 @@ def scan_programs() -> List[int]:
 
     processing = state_db.find_one({'key': PROCESS_KEY})
     if processing:
-        to_process = set(not_rated_programs) - set(processing['planned'])
+        to_process = list(set(not_rated_programs) - set(processing['planned']))
         state_db.update_one(
             {'_id': processing['_id']}, {'$set': {'key': PROCESS_KEY, 'planned': to_process}}
         )
