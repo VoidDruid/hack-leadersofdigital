@@ -14,6 +14,18 @@ fileConfig(config.config_file_name)  # setting up loggers
 target_metadata = Base.metadata
 
 
+def make_exclude_tables(config_):
+    tables_ = config_.get('tables', '')
+    return tables_.split(',')
+
+
+exclude_tables = make_exclude_tables(config.get_section('alembic:exclude'))
+
+
+def include_object(object_, name, type_, reflected, compare_to):
+    return not (type_ == 'table' and name in exclude_tables)
+
+
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
 
@@ -31,6 +43,7 @@ def run_migrations_offline():
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={'paramstyle': 'named'},
+        include_object=include_object,
     )
 
     with context.begin_transaction():
@@ -47,7 +60,9 @@ def run_migrations_online():
     connectable = create_engine(DB_URI)
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection, target_metadata=target_metadata, include_object=include_object,
+        )
 
         with context.begin_transaction():
             context.run_migrations()

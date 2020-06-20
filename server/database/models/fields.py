@@ -6,6 +6,7 @@ class ModelField:
     Field for SQLAlchemy ORM models, that binds to postgres JSON field,
     and can transform it into instance of pydantic model.
     """
+
     fields = ('__data', '__binding', '__model', '__field')
 
     def __init__(self, model: type, field: str) -> None:
