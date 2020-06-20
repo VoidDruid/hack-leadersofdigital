@@ -1,2 +1,2 @@
 # hack-leadersofdigital
-Фронтенд в сабмодуль hack-client
+Фронтенд в сабмодуль drop-table-client
