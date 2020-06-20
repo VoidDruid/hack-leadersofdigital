@@ -21,11 +21,11 @@ def init() -> None:
     try:
         # Check if DB is reachable
         db = Session()
-        db.execute("SELECT 1")
+        db.execute('SELECT 1')
     except Exception as e:
         logger.error(e)
         raise e
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     init()

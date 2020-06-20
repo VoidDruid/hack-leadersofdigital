@@ -18,11 +18,11 @@ from services.utils import paginate, raise_on_none
 
 from . import api
 
-from pydantic import BaseModel
 
 class ProgramStats(BaseModel):
     diff: Optional[Dict[str, List[Dict[str, str]]]]
     rating: Optional[int] = 0
+
 
 class ProgramSpider(BaseModel):
     id: int
@@ -30,6 +30,7 @@ class ProgramSpider(BaseModel):
     rating: Optional[int] = 128
     is_deleted: bool
     disciplines: List[Dict[str, str]]
+
 
 @api.get('/program/stats', response_model=Dict[int, ProgramStats], responses=extra)
 def programs_stats_list(db: Session = Depends(get_pg)) -> Union[Response, Dict]:
@@ -41,6 +42,7 @@ def programs_stats_list(db: Session = Depends(get_pg)) -> Union[Response, Dict]:
             stats_dict[p.created_at.year]['diff']['removed'].append({'id': p.id, 'name': p.name})
     return stats_dict
 
+
 @api.get('/program/spider', response_model=List[ProgramSpider], responses=extra)
 def programs_stats_list(db: Session = Depends(get_pg)) -> Union[Response, List]:
     programs: List[Program] = get_programs_(db, None).order_by(Program.created_at).all()
@@ -50,12 +52,14 @@ def programs_stats_list(db: Session = Depends(get_pg)) -> Union[Response, List]:
             'id': p.id,
             'is_deleted': True if p.deleted_at is not None else False,
             'name': p.name,
-            'disciplines': []
+            'disciplines': [],
         }
         for disc in p.disciplines:
-            entity['disciplines'].append({'name':disc.name, 'category': disc.category})
+            entity['disciplines'].append({'name': disc.name, 'category': disc.category})
         spider_list.append(entity)
     return spider_list
+
+
 @api.get('/program/{id}', response_model=ProgramSchema)
 @raise_on_none
 def get_program(program_id: int, db: Session = Depends(get_pg)) -> Program:
@@ -80,7 +84,5 @@ def programs_list(
 
 
 @api.post('/program', response_model=ProgramSchema, responses=extra)
-def create_event(
-    program: ProgramCreateSchema, db: Session = Depends(get_pg)
-) -> Program:
+def create_event(program: ProgramCreateSchema, db: Session = Depends(get_pg)) -> Program:
     return create_program_(db=db, program=program)

@@ -39,11 +39,7 @@ class Error(HTTPException):
     def render(self):
         return UJSONResponse(
             status_code=self.status_code,
-            content=ErrorResponse(
-                ok=False,
-                error=self.error,
-                error_code=self.error_code
-            ).dict()
+            content=ErrorResponse(ok=False, error=self.error, error_code=self.error_code).dict(),
         )
 
 

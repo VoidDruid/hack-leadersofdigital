@@ -6,7 +6,7 @@ from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse, UJSONResponse
 
 from conf import DEBUG
-from services.api import make_app, Error
+from services.api import Error, make_app
 
 app = make_app()
 
