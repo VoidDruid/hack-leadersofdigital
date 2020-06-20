@@ -24,7 +24,7 @@ class Mongo:
 
     def __init__(self):
         self.mongo_client = MongoClient(MONGO_URI)
-        self.mongo_db = self.mongo_client[mongo_settings.DATABASE_NAME]
+        self.mongo_db = self.mongo_client[mongo_settings.MONGO_NAME]
 
 
 __all__ = [
