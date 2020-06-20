@@ -21,6 +21,12 @@ class ParameterSchema(ParameterCreateSchema):  # get
     weight: float
 
 
+class ParameterInlineSchema(ORMSchema):
+    id: int
+    weight: Optional[float] = None
+    value: Optional[str] = None
+
+
 class DisciplineBaseSchema(ORMSchema):
     name: str
     category: str
@@ -46,7 +52,7 @@ class ProgramCreateSchema(ORMSchema):  # post, patch
     disciplines: Optional[List[int]] = None
     created_at: Optional[datetime.datetime] = None
     deleted_at: Optional[datetime.datetime] = None
-    parameters: Optional[List[ParameterSchema]] = None
+    parameters: Optional[List[ParameterInlineSchema]] = None
 
 
 class ProgramSchema(ProgramCreateSchema):  # get

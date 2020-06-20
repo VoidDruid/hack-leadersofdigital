@@ -61,13 +61,13 @@ def programs_spider_list(db: Session = Depends(get_pg)) -> Union[Response, List]
     return spider_list
 
 
-@api.get('/program/{id}', response_model=ProgramSchema)
+@api.get('/program/{id}', response_model=ProgramSchema, responses=extra('not_found'))
 @raise_on_none
 def get_program(program_id: int, db: Session = Depends(get_pg)) -> Program:
     return get_program_(db, program_id)
 
 
-@api.patch('/program/{id}', response_model=ProgramSchema, responses=extra)
+@api.patch('/program/{id}', response_model=ProgramSchema, responses=extra('not_found'))
 def update_program(
     program_id: int, program_base: ProgramCreateSchema, db: Session = Depends(get_pg)
 ) -> Union[Response, Program]:
