@@ -44,7 +44,7 @@ def programs_stats_list(db: Session = Depends(get_pg)) -> Union[Response, Dict]:
 
 
 @api.get('/program/spider', response_model=List[ProgramSpider], responses=extra)
-def programs_stats_list(db: Session = Depends(get_pg)) -> Union[Response, List]:
+def programs_spider_list(db: Session = Depends(get_pg)) -> Union[Response, List]:
     programs: List[Program] = get_programs_(db, None).order_by(Program.created_at).all()
     spider_list: List[ProgramSpider] = list()
     for p in programs:
