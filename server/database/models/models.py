@@ -6,9 +6,7 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
-    PrimaryKeyConstraint,
     String,
-    Table,
     Text,
 )
 from sqlalchemy.dialects.postgresql import JSONB

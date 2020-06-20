@@ -12,12 +12,13 @@ from crud import get_programs as get_programs_
 from database.models import Program, ProgramCreateSchema, ProgramSchema
 from services.api import extra
 from services.dependencies import get_db
-from services.utils import paginate
+from services.utils import paginate, raise_on_none
 
 from . import api
 
 
 @api.get('/program/{id}', response_model=ProgramSchema)
+@raise_on_none
 def get_program(program_id: int, db: Session = Depends(get_db)) -> Program:
     return get_program_(db, program_id)
 
@@ -30,7 +31,7 @@ def programs_list(
     category: Optional[str] = None,
     start_time: Optional[datetime.datetime] = None,
     end_time: Optional[datetime.datetime] = None,
-) -> Union[Response, List[Program]]:
+) -> List[Program]:
     query = get_programs_(db, category)
     if start_time:
         query = query.filter(Program.created_at >= start_time)
@@ -42,5 +43,5 @@ def programs_list(
 @api.post('/program', response_model=ProgramSchema, responses=extra)
 def create_event(
     program: ProgramCreateSchema, db: Session = Depends(get_db)
-) -> Union[Response, Program]:
+) -> Program:
     return create_program_(db=db, program=program)

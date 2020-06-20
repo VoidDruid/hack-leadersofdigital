@@ -1,7 +1,7 @@
 from functools import partial
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, HTTPException
 from starlette.responses import UJSONResponse
 
 from conf import DEBUG
@@ -28,17 +28,33 @@ class Api(APIRouter):
         return super().api_route(*args, **kwargs)
 
 
-def Error(
-    error: Union[str, Dict, List, Tuple], code: int = 400, error_code: str = 'Error',
-) -> UJSONResponse:  # noqa
-    return UJSONResponse(
-        status_code=code, content=ErrorResponse(ok=False, error=error, error_code=error_code).dict()
-    )
+class Error(HTTPException):
+    error: Optional[Union[str, Dict, List]] = None
+    status_code: int = 400
+    error_code: str = 'Error'
+
+    def __init__(self, error: Any):
+        self.error = error
+
+    def render(self):
+        return UJSONResponse(
+            status_code=self.status_code,
+            content=ErrorResponse(
+                ok=False,
+                error=self.error,
+                error_code=self.error_code
+            ).dict()
+        )
 
 
-# You can use those to directly return an error - `return NotFoundError('No such object')`
-PermissionsError = partial(Error, code=403, error_code='INVALID_PERMISSIONS')
-NotFoundError = partial(Error, code=404, error_code='NOT_FOUND')
+class PermissionsError(Error):
+    status_code = 403
+    error_code = 'INVALID_PERMISSIONS'
+
+
+class NotFoundError(Error):
+    status_code = 404
+    error_code = 'NOT_FOUND'
 
 
 class ResponsesContainer(dict):
@@ -59,7 +75,7 @@ class ResponsesContainer(dict):
     def __init__(self) -> None:
         dict.__init__(self, self.default_responses)
 
-    def __call__(self, extra_responses: Optional[List[str]] = None) -> Dict[int, Dict]:
+    def __call__(self, *extra_responses: List[str]) -> Dict[int, Dict]:
         result_responses = self.default_responses.copy()
         if extra_responses:
             for key in extra_responses:
