@@ -15,7 +15,7 @@ services:
       - --reload
     build:
       context: server
-      dockerfile: docker/Dockerfile.server
+      dockerfile: deployment/docker/Dockerfile.server
       target: dev
       args:
         RUN_LEVEL: dev
@@ -33,7 +33,7 @@ services:
       - RUN_LEVEL=dev
     build:
       context: server
-      dockerfile: docker/Dockerfile.celery
+      dockerfile: deployment/docker/Dockerfile.celery
       target: prod
     networks:
       - default
@@ -58,7 +58,7 @@ services:
 
   mongo:
     container_name: ldigital-mongo
-    image: mvertes/alpine-mongo
+    image: mongo
     ports:
       - "27017:27017"
     environment:
