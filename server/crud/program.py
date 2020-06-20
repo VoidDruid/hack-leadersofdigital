@@ -29,7 +29,7 @@ def create_program(db: Session, program: ProgramCreateSchema) -> Program:
         diff = set(program.disciplines) - set([discipline.id for discipline in disciplines])
         raise Error(f'Disciplines with ids {diff} do not exist')
 
-    db_program = Program(**program.dict(exclude={'disciplines'}))
+    db_program = Program(**program.dict(exclude={'disciplines', 'parameters'}))
 
     db_program.rel_parameters.extend(parameters)
 

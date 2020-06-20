@@ -67,6 +67,7 @@ class Program(Base):
     description = Column(Text)
     hours = Column(Integer)
     category = Column(ShortString, index=True)
+    rating = Column(Integer)
     rel_parameters = relationship(Parameter, secondary=ConcreteParameter.__table__)
     disciplines = relationship(Discipline, secondary=ConcreteDiscipline.__table__)
 

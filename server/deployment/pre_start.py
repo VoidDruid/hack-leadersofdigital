@@ -22,7 +22,7 @@ def init() -> None:
         pg = Session()
         pg.execute("SELECT 1")
         mongo = Mongo()
-        mongo.list_collections()
+        mongo.mongo_db.list_collections()
     except Exception as e:
         logger.error(e)
         raise e
