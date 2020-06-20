@@ -1,6 +1,9 @@
 # Develop image
 FROM python:3.8-slim as dev
 
+ARG RUN_LEVEL
+
+ENV RUN_LEVEL=${RUN_LEVEL}
 ENV PIP_DISABLE_PIP_VERSION_CHECK=on
 ENV PIP_NO_CACHE_DIR=off
 ENV PYTHONDONTWRITEBYTECODE=on
@@ -19,16 +22,15 @@ RUN pip install "poetry==$POETRY_VERSION" \
 RUN mkdir /opt/app
 WORKDIR /opt/app
 
-COPY pyproject.toml poetry.lock /opt/app/
-RUN poetry install --no-dev --no-interaction --no-ansi
+COPY pyproject.toml poetry.loc[k] /opt/app/
+RUN poetry install $(test "$RUN_LEVEL" == production && echo "--no-dev") --no-interaction --no-ansi
 
 EXPOSE 8000
 
 # Production image
 FROM dev as prod
 
-COPY deployment/start.sh deployment/gunicorn_conf.py /opt/app/
-RUN chmod +x start.sh
+COPY deployment/pre_start.py /opt/app/
 
 COPY alembic /opt/app/alembic
 COPY conf /opt/app/conf
@@ -37,4 +39,7 @@ COPY database /opt/app/database
 COPY services /opt/app/services
 COPY utils /opt/app/utils
 
-CMD ["./start.sh"]
+COPY deployment/server/server.sh deployment/server/gunicorn_conf.py /opt/app/
+RUN chmod +x server.sh
+
+CMD ["./server.sh"]

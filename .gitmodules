@@ -1,0 +1,3 @@
+[submodule "drop-table-client"]
+	path = drop-table-client
+	url = https://github.com/daibogh/drop-table-client

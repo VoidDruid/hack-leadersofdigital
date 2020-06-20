@@ -4,5 +4,6 @@ from services.api import Api
 
 api: Api = Api()
 
-# Import routes here
-# from .module import path  # isort:skip
+from .parameter import *  # isort:skip
+from .program import *  # isort:skip
+from .discipline import *  # isort:skip

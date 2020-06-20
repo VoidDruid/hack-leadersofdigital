@@ -5,7 +5,7 @@ networks:
 
 services:
   core: &service
-    container_name: unihack-core
+    container_name: ldigital-core
     environment:
       - RUN_LEVEL=dev
     entrypoint:
@@ -15,8 +15,10 @@ services:
       - --reload
     build:
       context: server
-      dockerfile: docker/Dockerfile.server
+      dockerfile: deployment/docker/Dockerfile.server
       target: dev
+      args:
+        RUN_LEVEL: dev
     volumes:
       - ./server:/opt/app
     networks:
@@ -24,8 +26,24 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
+
+  celery:
+    container_name: ldigital-celery
+    environment:
+      - RUN_LEVEL=dev
+    build:
+      context: server
+      dockerfile: deployment/docker/Dockerfile.celery
+      target: prod
+    networks:
+      - default
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+
   postgres:
-    container_name: unihack-postgres
+    container_name: ldigital-postgres
     image: mdillon/postgis
     ports:
       - "5432:5432"
@@ -37,10 +55,36 @@ services:
       - default
     volumes:
       - ./.docker_data/postgres:/var/lib/postgresql/data
+
+  mongo:
+    container_name: ldigital-mongo
+    image: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: ldigital
+    networks:
+      - default
+    volumes:
+      - ./.docker_data/mongo:/data/db
+
+  redis:
+    container_name: ldigital-redis
+    image: library/redis:alpine
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    networks:
+      - default
+    volumes:
+    - ./.docker_data/redis:/var/lib/redis
+
   nginx:
     build:
       context: nginx
-    container_name: unihack-nginx
+    container_name: ldigital-nginx
     ports:
       - "80:80"
     volumes:

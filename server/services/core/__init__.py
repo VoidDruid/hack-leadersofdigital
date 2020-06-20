@@ -1,18 +1,26 @@
-from typing import Any, Callable
+from typing import Any, Callable, Dict
 
 from fastapi.exceptions import RequestValidationError
+from fastapi.openapi.utils import get_openapi
 from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse, UJSONResponse
 
 from conf import DEBUG
-from services.api import make_app
+from services.api import Error, make_app
 
 app = make_app()
 
 
 @app.exception_handler(RequestValidationError)
 def type_error_handler(request: Request, exc: RequestValidationError) -> UJSONResponse:
-    return UJSONResponse(status_code=422, content={'ok': False, 'error': exc.args})
+    return UJSONResponse(
+        status_code=422, content={'ok': False, 'error': exc.args, 'error_code': 'INVALID_REQUEST'}
+    )
+
+
+@app.exception_handler(Error)
+def type_error_handler(request: Request, exc: Error) -> UJSONResponse:
+    return exc.render()
 
 
 @app.middleware('http')
@@ -26,13 +34,69 @@ from .routes import *  # pylint: disable=C0413  # isort:skip
 
 app.include_router(api, tags=['api'], prefix='/api')
 
+
+def json_api_schema() -> Dict[Any, Any]:
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    SUCCESS_CODES = ('200',)
+
+    openapi_schema = get_openapi(
+        title='*title placeholder*',
+        version='0.1.0',
+        description='OpenAPI schema',
+        routes=app.routes,
+    )
+
+    def process_responses(responses: List[Any]) -> None:
+        for response_code in responses:
+            if response_code not in ('200', '422'):
+                continue
+            response = responses[response_code]
+            schema = response['content']['application/json']['schema']
+
+            new_schema = {'type': 'object'}
+            if title := schema.pop('title', None):
+                new_schema['title'] = title
+            new_schema['properties'] = {  # type: ignore
+                'ok': {'title': 'Ok', 'type': 'boolean', 'default': response_code in SUCCESS_CODES}
+            }
+            if len(schema) > 1:
+                data = {'title': 'Data', **schema}
+            else:
+                data = schema
+            if response_code in SUCCESS_CODES:
+                field = 'data'
+            else:
+                field = 'error'
+                new_schema['properties']['error_code'] = {
+                    'title': 'Error code',
+                    'type': 'string',
+                    'default': 'ERROR_CODE',
+                }
+            new_schema['properties'][field] = data  # type: ignore
+
+            response['content']['application/json']['schema'] = new_schema
+
+    paths = openapi_schema['paths']
+    for path in paths.values():
+        for method in path.values():
+            process_responses(method['responses'])
+
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = json_api_schema
+
 if DEBUG:
     from starlette.middleware.cors import CORSMiddleware
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=['*'],
         allow_credentials=True,
         allow_methods=['*'],
         allow_headers=['*'],
-        expose_headers=['*']
+        expose_headers=['*'],
     )

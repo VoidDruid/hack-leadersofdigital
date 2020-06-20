@@ -1,7 +1,7 @@
 from functools import partial
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, HTTPException
 from starlette.responses import UJSONResponse
 
 from conf import DEBUG
@@ -17,8 +17,9 @@ def make_app(*args: Any, **kwargs: Any) -> FastAPI:
 
 class APIResponse(UJSONResponse):
     def render(self, content: Any) -> bytes:
-        # Customize response here
-	return super().render(content)
+        if isinstance(content, dict) and 'ok' in content:
+            return super().render(content)
+        return super().render({'ok': True, 'data': content})
 
 
 class Api(APIRouter):
@@ -27,13 +28,29 @@ class Api(APIRouter):
         return super().api_route(*args, **kwargs)
 
 
-def Error(error: Union[str, Dict, List, Tuple], code: int = 400) -> UJSONResponse:  # noqa
-    return UJSONResponse(status_code=code, content=ErrorResponse(ok=False, error=error).dict())
+class Error(HTTPException):
+    error: Optional[Union[str, Dict, List]] = None
+    status_code: int = 400
+    error_code: str = 'Error'
+
+    def __init__(self, error: Any):
+        self.error = error
+
+    def render(self):
+        return UJSONResponse(
+            status_code=self.status_code,
+            content=ErrorResponse(ok=False, error=self.error, error_code=self.error_code).dict(),
+        )
 
 
-# You can use those to directly return an error - `return NotFoundError('No such object')`
-PermissionsError = partial(Error, code=403)
-NotFoundError = partial(Error, code=404)
+class PermissionsError(Error):
+    status_code = 403
+    error_code = 'INVALID_PERMISSIONS'
+
+
+class NotFoundError(Error):
+    status_code = 404
+    error_code = 'NOT_FOUND'
 
 
 class ResponsesContainer(dict):
@@ -54,10 +71,10 @@ class ResponsesContainer(dict):
     def __init__(self) -> None:
         dict.__init__(self, self.default_responses)
 
-    def extra(self, extra: Optional[List[str]] = None) -> Dict[int, Dict]:
+    def __call__(self, *extra_responses: List[str]) -> Dict[int, Dict]:
         result_responses = self.default_responses.copy()
-        if extra:
-            for key in extra:
+        if extra_responses:
+            for key in extra_responses:
                 response = self.errors_dict.get(key)
                 if not response:
                     continue
@@ -66,6 +83,6 @@ class ResponsesContainer(dict):
 
 
 # basic usage: `@api.post(..., responses=responses)`. Error response 400 with ErrorResponse model is added by default
-# `@api.post(..., responses=responses.extra('not_found'))` - will add 404 code to default reponses
+# `@api.post(..., responses=extra('not_found'))` - will add 404 code to default responses
 # You can add new responses to the ResponsesContainer above
-responses = ResponsesContainer()
+extra = ResponsesContainer()

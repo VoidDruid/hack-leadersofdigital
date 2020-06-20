@@ -1,8 +1,8 @@
 import pytest
 
-from services.dependencies import get_db
+from services.dependencies import get_pg
 
 
 @pytest.fixture()
 def session():
-    yield from get_db()
+    yield from get_pg()
