@@ -56,19 +56,7 @@ descriptions='Quo usque tandem abutēre, ' \
              ' hic munitissĭmus habendi senātus locus. nihil horum ora vultusque ' \
              'movērunt? Patēre tua consilia non sentis? constrictam jam horum omnium ' \
              'scientia tenēri conjuratiōnem tuam non vides? Quid proxĭma, quid superiōre ' \
-             'nocte egĕris, ubi fueris, quos convocavĕris, quid consilii cepĕris, quem nostrum' \
-             ' ignorāre arbitrāris? 0 tempŏral 0 mores! Senātus haec intellĕgit, consul videt, hic ' \
-             'tamen vivit. Vivit? Immo vero etiam in senātum venit, fit publĭci consilii partĭceps, ' \
-             'notat et designat ocŭlis ad caedem .unumquemque nostrum: nos autem, fortes viri, satis ' \
-             'facĕre rei publĭcae vidēmur, si istīus furōrem ac tela vitēmus. Ad mortem te, Catilīna, duci ' \
-             'jussu consŭlis jam pridem oportēbat, in te conferri pestem, quam tu in nos machināris. An vero ' \
-             'vir amplissĭmus P. Scipio, pontĭfex maxĭmus, Ti. Gracchum, mediocrĭter labefactantem statum rei' \
-             ' publĭcae, privātus interfēcit: Catilīnam, orbem terrae caede atque incendiis vastāre cupientem, ' \
-             'nos consŭles perferēmus? Nam illa nimis antīqua praetereo, quod C. Servilius Ahala Spurium Maelium, ' \
-             'novis rebus studentem, manu sua occīdit. Fuit, fuit ista quondam in hac re publica virtus, ut viri ' \
-             'fortes acriorĭbus suppliciis civem perniciōsum quam acerbissĭmum hostem coërcērent. Habēmus senātus consultum ' \
-             'in te, Catilīna, vehĕmens et grave; non deest rei publĭcae consilium neque auctorĭtas hujus ordĭnis: nos, nos, ' \
-             'dico aperte, consŭles desŭmus.'
+             'nocte egĕris, ubi fueris, quos convocavĕris, quid consilii cepĕris, quem nostrum'
 
 def populate_parameters():
     db = Session()
@@ -93,7 +81,7 @@ def populate_programs():
     db = Session()
     #create active
     for i in range(30):
-        description = ''.join(descriptions.split())
+        description = descriptions
         category = random.choice(categories_name)
         created_at = datetime.datetime.utcnow()
         created_at = created_at.replace(year=created_at.year - random.randint(0,20))
