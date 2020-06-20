@@ -45,3 +45,6 @@ format:
 	unify --in-place --recursive $(CODE)
 
 validate: lint test
+
+populate:
+	python utils/populate.py
