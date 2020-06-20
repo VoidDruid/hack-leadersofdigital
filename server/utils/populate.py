@@ -104,12 +104,18 @@ def populate_programs():
         category = random.choice(categories_name)
         created_at = datetime.datetime.utcnow()
         created_at = created_at.replace(year=created_at.year - random.randint(0, 20))
+
         matched_disciplines = get_disciplines(db, category).all()
         dismatched_disciplines = (
             get_disciplines(db, None).filter(Discipline.category != category).all()
         )
 
-        disciplines = matched_disciplines[0:7] + dismatched_disciplines[0:3]
+        disciplines = (
+                random.choices(matched_disciplines, k=random.randint(5, 7))
+                +
+                random.choices(dismatched_disciplines, k=random.randint(1, 4))
+        )
+
         program = ProgramCreateSchema(
             name=f'{random.choice(categories_name)} {random.choice(pull_names)}',
             description=description,
