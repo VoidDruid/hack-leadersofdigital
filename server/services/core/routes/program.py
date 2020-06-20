@@ -1,7 +1,9 @@
 import datetime
-from typing import List, Optional, Union
+from collections import defaultdict
+from typing import Any, Dict, List, Optional, Union
 
 from fastapi import Depends
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from starlette.responses import Response
 
@@ -15,6 +17,17 @@ from services.dependencies import get_db
 from services.utils import paginate, raise_on_none
 
 from . import api
+
+
+@api.get('/program/stats', response_model=Dict[int, List[int]], responses=extra)
+def programs_stats_list(db: Session = Depends(get_db)) -> Union[Response, Dict]:
+    programs: List[Program] = get_programs_(db, None).all()
+    year_dict = defaultdict(list)
+    for p in programs:
+        last_year = p.deleted_at if p.deleted_at is not None else datetime.datetime.utcnow()
+        for y in range(p.created_at.year, last_year.year + 1):
+            year_dict[y].append(p.id)
+    return year_dict
 
 
 @api.get('/program/{id}', response_model=ProgramSchema)

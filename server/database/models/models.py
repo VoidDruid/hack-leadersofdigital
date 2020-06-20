@@ -111,7 +111,7 @@ class Program(Base):
         return params
 
     # time
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     deleted_at = Column(DateTime, nullable=True, default=None)
 
 
