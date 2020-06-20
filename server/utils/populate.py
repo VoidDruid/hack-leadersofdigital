@@ -110,7 +110,7 @@ def populate_programs():
             get_disciplines(db, None).filter(Discipline.category != category).all()
         )
 
-        disciplines = (
+        disciplines = set(
                 random.choices(matched_disciplines, k=random.randint(5, 7))
                 +
                 random.choices(dismatched_disciplines, k=random.randint(1, 4))
