@@ -11,6 +11,7 @@ from conf import service_settings
 from crud import create_program as create_program_
 from crud import get_program as get_program_
 from crud import get_programs as get_programs_
+from crud import update_program as update_program_
 from database.models import Program, ProgramCreateSchema, ProgramSchema
 from services.api import extra
 from services.dependencies import get_pg
@@ -64,6 +65,13 @@ def programs_spider_list(db: Session = Depends(get_pg)) -> Union[Response, List]
 @raise_on_none
 def get_program(program_id: int, db: Session = Depends(get_pg)) -> Program:
     return get_program_(db, program_id)
+
+
+@api.patch('/program/{id}', response_model=ProgramSchema, responses=extra)
+def update_program(
+    program_id: int, program_base: ProgramCreateSchema, db: Session = Depends(get_pg)
+) -> Union[Response, Program]:
+    return update_program_(db, program_id, program_base)
 
 
 @api.get('/program', response_model=List[ProgramSchema], responses=extra)

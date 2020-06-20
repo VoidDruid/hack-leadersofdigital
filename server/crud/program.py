@@ -41,3 +41,19 @@ def create_program(db: Session, program: ProgramCreateSchema) -> Program:
     db.refresh(db_program)
 
     return db_program
+
+
+def update_program(db: Session, program_id: int, patch_program: ProgramCreateSchema) -> Program:
+    values_dict = patch_program.dict(skip_defaults=True)
+
+    progran_query = db.query(Program).filter(
+        Program.id == program_id
+    )  # FIXME: make it a single query
+    program = progran_query.first()
+
+    db.query(Program).filter(Program.id == program.id).update(values_dict)
+
+    db.commit()
+    db.refresh(program)
+
+    return program

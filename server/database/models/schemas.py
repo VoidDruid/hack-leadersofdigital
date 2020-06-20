@@ -38,7 +38,7 @@ class DisciplineFullSchema(DisciplineCreateSchema):  # get one
     id: int
 
 
-class ProgramCreateSchema(ORMSchema):  # post
+class ProgramCreateSchema(ORMSchema):  # post, patch
     name: Optional[str] = None
     description: Optional[str] = None
     hours: Optional[int] = None
