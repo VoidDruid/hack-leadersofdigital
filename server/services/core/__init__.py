@@ -6,7 +6,7 @@ from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse, UJSONResponse
 
 from conf import DEBUG
-from services.api import make_app
+from services.api import Error, make_app
 
 app = make_app()
 
@@ -16,6 +16,11 @@ def type_error_handler(request: Request, exc: RequestValidationError) -> UJSONRe
     return UJSONResponse(
         status_code=422, content={'ok': False, 'error': exc.args, 'error_code': 'INVALID_REQUEST'}
     )
+
+
+@app.exception_handler(Error)
+def type_error_handler(request: Request, exc: Error) -> UJSONResponse:
+    return exc.render()
 
 
 @app.middleware('http')

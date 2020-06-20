@@ -1,18 +1,8 @@
 import datetime
 
-from sqlalchemy import (
-    Column,
-    DateTime,
-    Float,
-    ForeignKey,
-    Integer,
-    PrimaryKeyConstraint,
-    String,
-    Table,
-    Text,
-)
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import object_session, relationship
 
 from database import Base
 
@@ -77,11 +67,39 @@ class Program(Base):
     description = Column(Text)
     hours = Column(Integer)
     category = Column(ShortString, index=True)
-    parameters = relationship(Parameter, secondary=ConcreteParameter.__table__)
+    rel_parameters = relationship(Parameter, secondary=ConcreteParameter.__table__)
     disciplines = relationship(Discipline, secondary=ConcreteDiscipline.__table__)
 
+    @property
+    def parameters(self):
+        joined_params = (
+            object_session(self)
+            .query(Parameter, ConcreteParameter)
+            .filter(ConcreteParameter.program_id == self.id)
+            .filter(Parameter.id == ConcreteParameter.parameter_id)
+            .all()
+        )
+
+        params = []
+        for (param, concrete_param) in joined_params:
+            param_dict = {'id': param.id, 'type': param.type, 'name': param.name}
+
+            if concrete_param.weight is not None:
+                param_dict['weight'] = concrete_param.weight
+            else:
+                param_dict['weight'] = param.weight
+
+            if concrete_param.value is not None:
+                param_dict['value'] = concrete_param.value
+            else:
+                param_dict['value'] = param.value
+
+            params.append(param_dict)
+
+        return params
+
     # time
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     deleted_at = Column(DateTime, nullable=True, default=None)
 
 

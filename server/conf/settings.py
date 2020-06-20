@@ -28,13 +28,27 @@ class AppSettings(BaseSettings):
         env_prefix = 'APP_'
 
 
-# Database configuration
-class DatabaseSettings(AppSettings):
-    DATABASE_NAME: str = DATABASE_NAME
-    DATABASE_USER: str = DATABASE_USER
-    DATABASE_PASSWORD: str = DATABASE_PASSWORD
-    DATABASE_HOST: str = DATABASE_HOST
-    DATABASE_PORT: str = DATABASE_PORT
+class PostgresSettings(AppSettings):
+    PG_NAME: str = PG_NAME
+    PG_USER: str = PG_USER
+    PG_PASSWORD: str = PG_PASSWORD
+    PG_HOST: str = PG_HOST
+    PG_PORT: str = PG_PORT
+
+
+class MongoSettings(AppSettings):
+    MONGO_NAME: str = MONGO_NAME
+    MONGO_USER: str = MONGO_USER
+    MONGO_PASSWORD: str = MONGO_PASSWORD
+    MONGO_HOST: str = MONGO_HOST
+    MONGO_PORT: str = MONGO_PORT
+
+
+class RedisSettings(AppSettings):
+    REDIS_HOST: str = REDIS_HOST
+    REDIS_PORT: str = REDIS_PORT
+    CELERY_TASKS_DB: str = CELERY_TASKS_DB
+    CELERY_RESULT_DB: str = CELERY_RESULTS_DB
 
 
 class ServiceSettings(AppSettings):
@@ -43,15 +57,17 @@ class ServiceSettings(AppSettings):
 
 
 service_settings = ServiceSettings()
-db_settings = DatabaseSettings()
+pg_settings = PostgresSettings()
+redis_settings = RedisSettings()
+mongo_settings = MongoSettings()
 
 
-def make_db_uri(
-    user: str = db_settings.DATABASE_USER,
-    password: str = db_settings.DATABASE_PASSWORD,
-    host: str = db_settings.DATABASE_HOST,
-    port: str = db_settings.DATABASE_PORT,
-    db: Optional[str] = db_settings.DATABASE_NAME,
+def make_pg_uri(
+    user: str = pg_settings.PG_USER,
+    password: str = pg_settings.PG_PASSWORD,
+    host: str = pg_settings.PG_HOST,
+    port: str = pg_settings.PG_PORT,
+    db: Optional[str] = pg_settings.PG_NAME,
 ) -> str:
     connection_string = f'postgresql+psycopg2://{user}:{password}@{host}:{port}'
     if db:
@@ -59,4 +75,15 @@ def make_db_uri(
     return connection_string
 
 
-DB_URI = make_db_uri()
+def make_mongo_uri(
+    user: str = mongo_settings.MONGO_USER,
+    password: str = mongo_settings.MONGO_PASSWORD,
+    host: str = mongo_settings.MONGO_HOST,
+    port: str = mongo_settings.MONGO_PORT,
+) -> str:
+    connection_string = f'mongodb://{user}:{password}@{host}:{port}'
+    return connection_string
+
+
+PG_URI = make_pg_uri()
+MONGO_URI = make_mongo_uri()
