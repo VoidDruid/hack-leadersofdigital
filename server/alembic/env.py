@@ -3,11 +3,11 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import create_engine
 
-from conf import DB_URI
+from conf import PG_URI
 from database import Base
 
 config = context.config
-config.set_main_option('sqlalchemy.url', DB_URI)
+config.set_main_option('sqlalchemy.url', PG_URI)
 
 fileConfig(config.config_file_name)  # setting up loggers
 
@@ -39,7 +39,7 @@ def run_migrations_offline():
 
     """
     context.configure(
-        url=DB_URI,
+        url=PG_URI,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={'paramstyle': 'named'},
@@ -57,7 +57,7 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-    connectable = create_engine(DB_URI)
+    connectable = create_engine(PG_URI)
 
     with connectable.connect() as connection:
         context.configure(

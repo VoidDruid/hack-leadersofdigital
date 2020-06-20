@@ -13,14 +13,14 @@ from crud import get_program as get_program_
 from crud import get_programs as get_programs_
 from database.models import Program, ProgramCreateSchema, ProgramSchema
 from services.api import extra
-from services.dependencies import get_db
+from services.dependencies import get_pg
 from services.utils import paginate, raise_on_none
 
 from . import api
 
 
 @api.get('/program/stats', response_model=Dict[int, List[int]], responses=extra)
-def programs_stats_list(db: Session = Depends(get_db)) -> Union[Response, Dict]:
+def programs_stats_list(db: Session = Depends(get_pg)) -> Union[Response, Dict]:
     programs: List[Program] = get_programs_(db, None).all()
     year_dict = defaultdict(list)
     for p in programs:
@@ -32,13 +32,13 @@ def programs_stats_list(db: Session = Depends(get_db)) -> Union[Response, Dict]:
 
 @api.get('/program/{id}', response_model=ProgramSchema)
 @raise_on_none
-def get_program(program_id: int, db: Session = Depends(get_db)) -> Program:
+def get_program(program_id: int, db: Session = Depends(get_pg)) -> Program:
     return get_program_(db, program_id)
 
 
 @api.get('/program', response_model=List[ProgramSchema], responses=extra)
 def programs_list(
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pg),
     offset: Optional[int] = 0,
     limit: Optional[int] = service_settings.MAX_LIMIT,
     category: Optional[str] = None,
@@ -55,6 +55,6 @@ def programs_list(
 
 @api.post('/program', response_model=ProgramSchema, responses=extra)
 def create_event(
-    program: ProgramCreateSchema, db: Session = Depends(get_db)
+    program: ProgramCreateSchema, db: Session = Depends(get_pg)
 ) -> Program:
     return create_program_(db=db, program=program)

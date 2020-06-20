@@ -9,12 +9,16 @@ class ORMSchema(BaseModel):
         orm_mode = True
 
 
-class ParameterSchema(ORMSchema):  # get
-    id: int
+class ParameterCreateSchema(ORMSchema):  # post
     name: str
-    type: str
-    weight: float
+    type: Optional[str] = 'int'
+    weight: Optional[float] = 1
     value: Optional[str] = None
+
+
+class ParameterSchema(ParameterCreateSchema):  # get
+    id: int
+    weight: float
 
 
 class DisciplineBaseSchema(ORMSchema):

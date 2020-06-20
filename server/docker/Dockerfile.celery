@@ -1,9 +1,6 @@
 # Develop image
 FROM python:3.8-slim as dev
 
-ARG RUN_LEVEL
-
-ENV RUN_LEVEL=${RUN_LEVEL}
 ENV PIP_DISABLE_PIP_VERSION_CHECK=on
 ENV PIP_NO_CACHE_DIR=off
 ENV PYTHONDONTWRITEBYTECODE=on
@@ -23,7 +20,7 @@ RUN mkdir /opt/app
 WORKDIR /opt/app
 
 COPY pyproject.toml poetry.loc[k] /opt/app/
-RUN poetry install $(test "$RUN_LEVEL" == production && echo "--no-dev") --no-interaction --no-ansi
+RUN poetry install --no-dev --no-interaction --no-ansi
 
 EXPOSE 8000
 
@@ -39,7 +36,18 @@ COPY database /opt/app/database
 COPY services /opt/app/services
 COPY utils /opt/app/utils
 
-COPY deployment/server/server.sh deployment/server/gunicorn_conf.py /opt/app/
-RUN chmod +x server.sh
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    supervisor \
+    && rm -rf /var/lib/apt/lists/*
 
-CMD ["./server.sh"]
+COPY deployment/celery/worker.sh deployment/celery/beat.sh deployment/celery/supervisord.sh \
+     deployment/celery/supervisord.conf deployment/celery/celeryd.conf \
+     /opt/app/
+RUN chmod +x supervisord.sh
+
+RUN mkdir -p /var/log/supervisord
+RUN mkdir -p /var/log/celery/
+
+COPY worker /opt/app/worker
+
+CMD ["./supervisord.sh"]
