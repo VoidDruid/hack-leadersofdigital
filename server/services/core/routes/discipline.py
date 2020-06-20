@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 from starlette.responses import Response
 
 from conf import service_settings
-from database import Discipline, DisciplineSchema
 from crud import get_discipline as get_discipline_
 from crud import get_disciplines as get_disciplines_
+from database import Discipline, DisciplineSchema
 from services.api import Error, extra
 from services.dependencies import get_db
 from services.utils import paginate

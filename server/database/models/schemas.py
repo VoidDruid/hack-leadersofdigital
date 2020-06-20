@@ -1,5 +1,5 @@
 import datetime
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
@@ -9,7 +9,7 @@ class ORMSchema(BaseModel):
         orm_mode = True
 
 
-class ParameterSchema(ORMSchema):
+class ParameterSchema(ORMSchema):  # get
     id: int
     name: str
     type: str
@@ -17,10 +17,21 @@ class ParameterSchema(ORMSchema):
     value: Optional[str] = None
 
 
-class DisciplineSchema(ORMSchema):
-    id: int
+class DisciplineBaseSchema(ORMSchema):
     name: str
     category: str
+
+
+class DisciplineCreateSchema(DisciplineBaseSchema):  # post
+    parameters: Optional[Dict[str, Any]]
+
+
+class DisciplineSchema(DisciplineBaseSchema):  # get list
+    id: int
+
+
+class DisciplineFullSchema(DisciplineCreateSchema):  # get one
+    id: int
 
 
 class ProgramCreateSchema(ORMSchema):  # post
@@ -37,3 +48,14 @@ class ProgramSchema(ProgramCreateSchema):  # get
     id: int
     parameters: List[ParameterSchema]
     disciplines: List[DisciplineSchema]
+
+
+class ProgramTemplateCreateSchema(ORMSchema):  # post
+    category: str
+    hours: Optional[int]
+    disciplines: Optional[List[int]] = None
+
+
+class ProgramTemplateSchema(ProgramTemplateCreateSchema):  # get
+    id: int
+    disciplines: Optional[List[DisciplineSchema]] = None

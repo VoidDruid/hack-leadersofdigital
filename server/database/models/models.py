@@ -1,6 +1,16 @@
 import datetime
 
-from sqlalchemy import Column, Float, DateTime, ForeignKey, Integer, PrimaryKeyConstraint, String, Table, Text
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    PrimaryKeyConstraint,
+    String,
+    Table,
+    Text,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
@@ -75,8 +85,24 @@ class Program(Base):
     deleted_at = Column(DateTime, nullable=True, default=None)
 
 
+class TemplateDiscipline(Base):
+    __tablename__ = 'program_template_to_discipline'
+    discipline_id = Column(
+        'discipline_id', Integer, ForeignKey(Discipline.id), nullable=False, primary_key=True
+    )
+    program_id = Column(
+        'program_template_id',
+        Integer,
+        ForeignKey('program_template.program_template_id'),
+        nullable=False,
+        primary_key=True,
+    )
+    hours = Column('hours', Integer)
+
+
 class ProgramTemplate(Base):
     __tablename__ = 'program_template'
     id = Column('program_template_id', Integer, primary_key=True, index=True)
     hours = Column(Integer)
     category = Column(ShortString, unique=True)
+    disciplines = relationship(Discipline, secondary=TemplateDiscipline.__table__)

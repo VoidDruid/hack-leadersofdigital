@@ -64,7 +64,11 @@ def json_api_schema() -> Dict[Any, Any]:
                 field = 'data'
             else:
                 field = 'error'
-                new_schema['properties']['error_code'] = {'title': 'Error code', 'type': 'string', 'default': 'ERROR_CODE'}
+                new_schema['properties']['error_code'] = {
+                    'title': 'Error code',
+                    'type': 'string',
+                    'default': 'ERROR_CODE',
+                }
             new_schema['properties'][field] = data  # type: ignore
 
             response['content']['application/json']['schema'] = new_schema

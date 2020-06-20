@@ -1,8 +1,8 @@
 from typing import Optional
 
-from database.models import Parameter, Program, ProgramCreateSchema
-
 from sqlalchemy.orm import Query, Session
+
+from database.models import Parameter, Program, ProgramCreateSchema
 
 
 def get_programs(db: Session, category: Optional[str]) -> Query:

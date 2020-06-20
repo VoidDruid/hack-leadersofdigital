@@ -6,9 +6,9 @@ Create Date: 2020-06-19 22:42:11.494464
 
 """
 import sqlalchemy as sa
-from sqlalchemy.engine.reflection import Inspector
 from alembic import op
 from sqlalchemy.dialects import postgresql
+from sqlalchemy.engine.reflection import Inspector
 
 # revision identifiers, used by Alembic.
 revision = '32a80059fe98'

@@ -1,7 +1,7 @@
 from functools import partial
 from typing import Any
 
-from cachetools import cached, TTLCache
+from cachetools import TTLCache, cached
 from cachetools.keys import hashkey
 from sqlalchemy.orm import Session
 
