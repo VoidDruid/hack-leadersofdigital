@@ -27,6 +27,10 @@ EXPOSE 8000
 # Production image
 FROM dev as prod
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    supervisor \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY deployment/pre_start.py /opt/app/
 
 COPY alembic /opt/app/alembic
@@ -35,10 +39,6 @@ COPY crud /opt/app/crud
 COPY database /opt/app/database
 COPY services /opt/app/services
 COPY utils /opt/app/utils
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    supervisor \
-    && rm -rf /var/lib/apt/lists/*
 
 COPY deployment/celery/worker.sh deployment/celery/beat.sh deployment/celery/supervisord.sh \
      deployment/celery/supervisord.conf deployment/celery/celeryd.conf \
