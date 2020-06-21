@@ -42,6 +42,9 @@ def create_program(db: Session, program: ProgramCreateSchema) -> Program:
     set_disciplines(db, db_program, program.disciplines)
 
     db_program.rel_parameters.extend(parameters)
+
+    db.add(db_program)
+
     db_program.parameters = program.parameters
 
     db.add(db_program)
