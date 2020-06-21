@@ -1,5 +1,5 @@
 CODE = .
-PACKAGES = conf crud database services utils
+PACKAGES = conf crud database services utils worker
 # Allow setting run level from cli
 RUN_LEVEL = local
 L = RUN_LEVEL=$(RUN_LEVEL)
@@ -45,3 +45,6 @@ format:
 	unify --in-place --recursive $(CODE)
 
 validate: lint test
+
+populate:
+	python utils/populate.py

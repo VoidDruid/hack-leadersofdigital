@@ -2,7 +2,7 @@ import logging
 
 from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
 
-from database import Session, Mongo
+from database import Mongo, Session
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -20,9 +20,9 @@ wait_seconds = 1
 def init() -> None:
     try:
         pg = Session()
-        pg.execute("SELECT 1")
+        pg.execute('SELECT 1')
         mongo = Mongo()
-        mongo.list_collections()
+        mongo.mongo_db.list_collections()
     except Exception as e:
         logger.error(e)
         raise e

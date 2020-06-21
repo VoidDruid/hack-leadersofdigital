@@ -44,6 +44,7 @@ def run_migrations_offline():
         literal_binds=True,
         dialect_opts={'paramstyle': 'named'},
         include_object=include_object,
+        compare_type=True,
     )
 
     with context.begin_transaction():

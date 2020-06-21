@@ -1,12 +1,13 @@
 import datetime
+from typing import Optional, List, Any
 
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Text, bindparam, and_
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import object_session, relationship
 
 from database import Base
 
-ShortString = String(25)
+ShortString = String(50)
 LongString = String(100)
 
 
@@ -23,7 +24,7 @@ class Config(Base):
 class Parameter(Base):
     __tablename__ = 'parameter'
     id = Column('parameter_id', Integer, primary_key=True, index=True)
-    name = Column(ShortString, nullable=False, unique=True)
+    name = Column(String(100), nullable=False, unique=True)
     type = Column(ShortString, nullable=False)
     weight = Column(Float, nullable=False)
     value = Column(LongString)
@@ -32,7 +33,7 @@ class Parameter(Base):
 class Discipline(Base):
     __tablename__ = 'discipline'
     id = Column('discipline_id', Integer, primary_key=True, index=True)
-    name = Column(ShortString, index=True, nullable=False)
+    name = Column(String(100), index=True, nullable=False)
     category = Column(ShortString, index=True)
     parameters = Column('parameters', JSONB)
 
@@ -63,10 +64,11 @@ class ConcreteDiscipline(Base):
 class Program(Base):
     __tablename__ = 'program'
     id = Column('program_id', Integer, primary_key=True, index=True)
-    name = Column(ShortString, index=True, nullable=False)
+    name = Column(String(100), index=True, nullable=False)
     description = Column(Text)
     hours = Column(Integer)
     category = Column(ShortString, index=True)
+    rating = Column(Integer)
     rel_parameters = relationship(Parameter, secondary=ConcreteParameter.__table__)
     disciplines = relationship(Discipline, secondary=ConcreteDiscipline.__table__)
 
@@ -97,6 +99,24 @@ class Program(Base):
             params.append(param_dict)
 
         return params
+
+    @parameters.setter
+    def parameters(self, parameters: Optional[List[Any]]):
+        if not parameters:
+            return
+
+        stmt = ConcreteParameter.__table__.update().where(and_(
+            ConcreteParameter.program_id == self.id,
+            ConcreteParameter.parameter_id == bindparam('id'),
+        )).values({
+            'weight': bindparam('weight'),
+            'value': bindparam('value'),
+        })
+
+        object_session(self).connection().execute(
+            stmt,
+            [param.dict() for param in parameters],
+        )
 
     # time
     created_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
