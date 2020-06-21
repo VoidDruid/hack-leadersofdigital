@@ -28,7 +28,7 @@ def queue_program(program: Program) -> None:
 class ProgramSpider(BaseModel):
     id: int
     name: str
-    rating: Optional[int] = 128
+    rating: Optional[int] = None
     is_deleted: bool
     disciplines: List[Dict[str, str]]
     category: str
@@ -52,11 +52,21 @@ class YearStats(BaseModel):
 @api.get('/program/stats', response_model=Dict[int, YearStats], responses=extra)
 def programs_stats_list(db: Session = Depends(get_pg)) -> Union[Response, Dict]:
     programs: List[Program] = get_programs_(db, None).order_by(Program.created_at).all()
+
+    years_data = defaultdict(lambda: defaultdict(int))
     stats_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+
     for p in programs:
+        if p.rating is not None:
+            years_data[p.created_at.year]['count'] += 1
+            years_data[p.created_at.year]['rating'] += p.rating
         stats_dict[p.created_at.year]['diff']['added'].append({'id': p.id, 'name': p.name})
         if p.deleted_at is not None:
             stats_dict[p.created_at.year]['diff']['removed'].append({'id': p.id, 'name': p.name})
+
+    for year, data in years_data.items():
+        stats_dict[year]['rating'] = int(data['rating'] / data['count'])
+
     return stats_dict
 
 
@@ -74,6 +84,7 @@ def programs_spider_list(
             'name': p.name,
             'disciplines': [],
             'category': p.category,
+            'rating': p.rating,
         }
         for disc in p.disciplines:
             entity['disciplines'].append({'name': disc.name, 'category': disc.category})
