@@ -44,7 +44,7 @@ def process_program(self, id: int) -> Optional[str]:
     session = Session()
 
     program = session.query(Program).filter(Program.id == id).one_or_none()
-    if not program or program.rating is not None:
+    if not program:
         return
 
     state_db = Mongo(STATE_COLL)
@@ -63,5 +63,7 @@ def process_program(self, id: int) -> Optional[str]:
         {'key': PROCESS_KEY},
         {'$pull': {'planned': id}}
     )
+
+    stats_db = Mongo(STATS_COLL)
 
     return f'New rating for program <{id}>: {rating}'
