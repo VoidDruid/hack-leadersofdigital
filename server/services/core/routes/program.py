@@ -40,8 +40,8 @@ class MiniDiscipline(BaseModel):
 
 
 class YearDiff(BaseModel):
-    added: List[MiniDiscipline]
-    removed: List[MiniDiscipline]
+    added: List[MiniDiscipline] = []
+    removed: List[MiniDiscipline] = []
 
 
 class YearStats(BaseModel):
