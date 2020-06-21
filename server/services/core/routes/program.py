@@ -11,48 +11,80 @@ from conf import service_settings
 from crud import create_program as create_program_
 from crud import get_program as get_program_
 from crud import get_programs as get_programs_
+from crud import update_program as update_program_
 from database.models import Program, ProgramCreateSchema, ProgramSchema
 from services.api import extra
 from services.dependencies import get_pg
 from services.utils import paginate, raise_on_none
+from worker.tasks import process_program
 
 from . import api
 
 
-class ProgramStats(BaseModel):
-    diff: Optional[Dict[str, List[Dict[str, str]]]]
-    rating: Optional[int] = 0
+def queue_program(program: Program) -> None:
+    process_program.delay(program.id)
 
 
 class ProgramSpider(BaseModel):
     id: int
     name: str
-    rating: Optional[int] = 128
+    rating: Optional[int] = None
     is_deleted: bool
     disciplines: List[Dict[str, str]]
+    category: str
 
 
-@api.get('/program/stats', response_model=Dict[int, ProgramStats], responses=extra)
+class MiniDiscipline(BaseModel):
+    id: int
+    name: str
+
+
+class YearDiff(BaseModel):
+    added: List[MiniDiscipline] = []
+    removed: List[MiniDiscipline] = []
+
+
+class YearStats(BaseModel):
+    diff: YearDiff
+    rating: int = 0
+
+
+@api.get('/program/stats', response_model=Dict[int, YearStats], responses=extra)
 def programs_stats_list(db: Session = Depends(get_pg)) -> Union[Response, Dict]:
     programs: List[Program] = get_programs_(db, None).order_by(Program.created_at).all()
+
+    years_data = defaultdict(lambda: defaultdict(int))
     stats_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+
     for p in programs:
+        if p.rating is not None:
+            years_data[p.created_at.year]['count'] += 1
+            years_data[p.created_at.year]['rating'] += p.rating
         stats_dict[p.created_at.year]['diff']['added'].append({'id': p.id, 'name': p.name})
         if p.deleted_at is not None:
             stats_dict[p.created_at.year]['diff']['removed'].append({'id': p.id, 'name': p.name})
+
+    for year, data in years_data.items():
+        stats_dict[year]['rating'] = int(data['rating'] / data['count'])
+
     return stats_dict
 
 
 @api.get('/program/spider', response_model=List[ProgramSpider], responses=extra)
-def programs_spider_list(db: Session = Depends(get_pg)) -> Union[Response, List]:
-    programs: List[Program] = get_programs_(db, None).order_by(Program.created_at).all()
-    spider_list: List[ProgramSpider] = list()
+def programs_spider_list(
+    db: Session = Depends(get_pg),
+    category: Optional[str] = None
+) -> Union[Response, List]:
+    programs: List[Program] = get_programs_(db, category).order_by(Program.created_at).all()
+    spider_list = []
     for p in programs:
         entity = {
             'id': p.id,
             'is_deleted': True if p.deleted_at is not None else False,
             'name': p.name,
             'disciplines': [],
+            'category': p.category,
+            'rating': p.rating,
         }
         for disc in p.disciplines:
             entity['disciplines'].append({'name': disc.name, 'category': disc.category})
@@ -60,7 +92,7 @@ def programs_spider_list(db: Session = Depends(get_pg)) -> Union[Response, List]
     return spider_list
 
 
-@api.get('/program/{id}', response_model=ProgramSchema)
+@api.get('/program/{id}', response_model=ProgramSchema, responses=extra('not_found'))
 @raise_on_none
 def get_program(program_id: int, db: Session = Depends(get_pg)) -> Program:
     return get_program_(db, program_id)
@@ -85,4 +117,15 @@ def programs_list(
 
 @api.post('/program', response_model=ProgramSchema, responses=extra)
 def create_event(program: ProgramCreateSchema, db: Session = Depends(get_pg)) -> Program:
-    return create_program_(db=db, program=program)
+    program = create_program_(db=db, program=program)
+    queue_program(program)
+    return program
+
+
+@api.patch('/program/{id}', response_model=ProgramSchema, responses=extra('not_found'))
+def update_program(
+    program_id: int, program_base: ProgramCreateSchema, db: Session = Depends(get_pg)
+) -> Union[Response, Program]:
+    program = update_program_(db, program_id, program_base)
+    queue_program(program)
+    return program

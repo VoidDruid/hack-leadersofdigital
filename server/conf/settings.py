@@ -52,8 +52,9 @@ class RedisSettings(AppSettings):
 
 
 class ServiceSettings(AppSettings):
-    MAX_LIMIT: int = 20  # for paging, remove if unused
+    MAX_LIMIT: int = 20
     CONFIG_CACHE_TTL: int = 60
+    SCAN_PROGRAMS_DELAY: int = 120
 
 
 service_settings = ServiceSettings()

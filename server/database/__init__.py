@@ -19,11 +19,18 @@ from .models import *  # isort:skip
 
 class Mongo:
     def __getattr__(self, item):
-        return getattr(self.mongo_db, item)
+        return getattr(self.mongo_collection, item)
 
-    def __init__(self):
+    def __init__(self, collection: Optional[str] = None):
         self.mongo_client = MongoClient(MONGO_URI)
         self.mongo_db = self.mongo_client[mongo_settings.MONGO_NAME]
+        if collection:
+            self.mongo_collection = self.mongo_db[collection]
+        else:
+            self.mongo_collection = None
+
+    def set_collection(self, collection: str):
+        self.mongo_collection = collection
 
 
 __all__ = [
